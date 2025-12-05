@@ -3,32 +3,52 @@
 
 pragma solidity ^0.8.19;
 
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-
+import {PriceConverter} from "./PriceConverter.sol";
 
 contract FundMe {
+    using PriceConverter for uint256;
 
 uint256 public minimumUsd = 5 * 1e18;
 
+address[] public funders;
+mapping(address funder => uint256 amountFunded) public addressToAmountFunded;
+
 function fund() public payable  {
-    require(getConversionRate(msg.value) >= minimumUsd, "You need to spend more ETH!"); //18 decimal places
+    require(msg.value.getConversionRate() >= minimumUsd, "You need to spend more ETH!"); //18 decimal places
+    funders.push(msg.sender);
+    addressToAmountFunded[msg.sender] += msg.value;
 }
 
-// function withdraw() public {}
-function getPrice() public view returns(uint256) {
-    // Address 0x694AA1769357215DE4FAC081bf1f309aDC325306
-    // ABI done by importing
-    AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-    (,int256 price,,,) = priceFeed.latestRoundData();
-    // price of eth in terms of usd look like 2000.00000000 no decimals shown but at 8 decimal places
-    return uint256(price * 1e10);
-}   
-function getConversionRate(uint256 ethAmount) public view returns(uint256) {
-    uint256 ethPrice = getPrice();
-    uint256 ethAmountInUSD = (ethPrice * ethAmount)/ 1e18;
-    return ethAmountInUSD;
+function withdraw() public {
+// for loop
+//for(starting index, ending index, step amount)
+for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++){
+{
+    address funder = funders[funderIndex];
+    addressToAmountFunded[funder] = 0;
+}
+    // reset the array
+    funders = new address[](0);
+    // actually withdraw the funds
+
+    // transfer
+    // msg.sender = address
+    // payable(msg.sender) = payable address
+    payable(msg.sender.transfer(address(this).balance);
+
+    // send
+    bool sendSuccess = payable(msg.sender.send(address(this).balance);
+    require(sendSuccess, "Send Failed");
+    
+    // call
+    (bool callSuccess, ) = payable(msg.sender.call{value: address(this).balance}("");
+        require(callSuccess, "Call Failed");
+
+
 }
 
+
+}
 
 
 }
